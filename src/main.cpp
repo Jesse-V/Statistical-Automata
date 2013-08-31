@@ -1,6 +1,7 @@
 
 #include <array>
 #include <unordered_map>
+#include <thread>
 #include <iostream>
 
 
@@ -64,7 +65,7 @@ void print(const std::string& title, const Matrix2D& array)
 
 
 
-Matrix2D getRuleMatrix(const Matrix2D& neighborCounts)
+Matrix2D getRuleMatrix(const Matrix2D& neighborCounts, const Matrix2D& adjMatrix)
 {
     static std::unordered_map<int, int> rules({ //maps neighbor count to rule
         {0, -1},
@@ -80,9 +81,28 @@ Matrix2D getRuleMatrix(const Matrix2D& neighborCounts)
 
     Matrix2D ruleMatrix;
     for (std::size_t i = 0; i < N; i++)
+    {
         for (std::size_t j = 0; j < N; j++)
-            ruleMatrix[i][j] = rules[neighborCounts[i][j]];
+        {
+            if (adjMatrix[i][j] == 0)
+                ruleMatrix[i][j] = rules[neighborCounts[i][j]];
+            else
+                ruleMatrix[i][j] = 0;
+        }
+    }
+
     return ruleMatrix;
+}
+
+
+
+Matrix2D sumMatrices(const Matrix2D& a, const Matrix2D& b)
+{
+    Matrix2D sum;
+    for (std::size_t i = 0; i < N; i++)
+        for (std::size_t j = 0; j < N; j++)
+            sum[i][j] = a[i][j] + b[i][j];
+    return sum;
 }
 
 
@@ -95,13 +115,25 @@ int main(int argc, char **argv)
         {{ 1, 1, 0 }}
     }};
 
-    print("Current Adjacency Matrix:", adjacencyMatrix);
+    int iterationCount = 0;
 
-    auto counts = getLiveNeighborCounts(adjacencyMatrix);
+    while (true)
+    {
+        std::cout << "Iteration: " << iterationCount << std::endl;
+        print("Current Adjacency Matrix:", adjacencyMatrix);
 
-    print("Live Neighbor Counts:", counts);
+        auto counts = getLiveNeighborCounts(adjacencyMatrix);
 
-    auto ruleMatrix = getRuleMatrix(counts);
+        print("Live Neighbor Counts:", counts);
 
-    print("Rule Matrix:", ruleMatrix);
+        auto ruleMatrix = getRuleMatrix(counts, adjacencyMatrix);
+
+        print("Rule Matrix:", ruleMatrix);
+
+        adjacencyMatrix = sumMatrices(adjacencyMatrix, ruleMatrix);
+        iterationCount++;
+
+        std::cout << "---------------------------------" << std::endl;
+        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    }
 }
