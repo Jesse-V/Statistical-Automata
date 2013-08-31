@@ -1,15 +1,16 @@
 
 #include <array>
+#include <unordered_map>
 #include <iostream>
 
 
 const int N = 3;
-typedef std::array<std::array<int, N>, N> Array2D;
+typedef std::array<std::array<int, N>, N> Matrix2D;
 
 
-Array2D getLiveNeighborCounts(const Array2D& adjacencyMatrix)
+Matrix2D getLiveNeighborCounts(const Matrix2D& adjacencyMatrix)
 {
-    Array2D liveNeighborCount;
+    Matrix2D liveNeighborCount;
     for (std::size_t i = 0; i < N; i++)
     {
         for (std::size_t j = 0; j < N; j++)
@@ -49,13 +50,13 @@ Array2D getLiveNeighborCounts(const Array2D& adjacencyMatrix)
 
 
 
-void print(const std::string& title, const Array2D& array)
+void print(const std::string& title, const Matrix2D& array)
 {
     std::cout << title << std::endl;
     for (std::size_t i = 0; i < N; i++)
     {
         for (std::size_t j = 0; j < N; j++)
-            std::cout << array[i][j] << " ";
+            std::cout << array[i][j] << "   ";
 
         std::cout << std::endl;
     }
@@ -63,17 +64,44 @@ void print(const std::string& title, const Array2D& array)
 
 
 
+Matrix2D getRuleMatrix(const Matrix2D& neighborCounts)
+{
+    static std::unordered_map<int, int> rules({ //maps neighbor count to rule
+        {0, -1},
+        {1, -1},
+        {2,  0},
+        {3,  1},
+        {4, -1},
+        {5, -1},
+        {6, -1},
+        {7, -1},
+        {8, -1},
+    });
+
+    Matrix2D ruleMatrix;
+    for (std::size_t i = 0; i < N; i++)
+        for (std::size_t j = 0; j < N; j++)
+            ruleMatrix[i][j] = rules[neighborCounts[i][j]];
+    return ruleMatrix;
+}
+
+
+
 int main(int argc, char **argv)
 {
-    Array2D adjacencyMatrix{{
+    Matrix2D adjacencyMatrix{{
         {{ 0, 1, 1 }},
         {{ 1, 0, 1 }},
         {{ 1, 1, 0 }}
     }};
 
     print("Current Adjacency Matrix:", adjacencyMatrix);
-    
+
     auto counts = getLiveNeighborCounts(adjacencyMatrix);
 
     print("Live Neighbor Counts:", counts);
+
+    auto ruleMatrix = getRuleMatrix(counts);
+
+    print("Rule Matrix:", ruleMatrix);
 }
