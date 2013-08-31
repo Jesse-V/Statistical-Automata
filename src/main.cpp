@@ -26,7 +26,7 @@ int main(int argc, char **argv)
 
         print("Rule Matrix:", ruleMatrix);
 
-        adjacencyMatrix = sumMatrices(adjacencyMatrix, ruleMatrix);
+        adjacencyMatrix = applyRuleMatrix(adjacencyMatrix, ruleMatrix);
         iterationCount++;
 
         std::cout << "---------------------------------" << std::endl;
@@ -39,15 +39,15 @@ int main(int argc, char **argv)
 Matrix2D getRuleMatrix(const Matrix2D& neighborCounts, const Matrix2D& adjMatrix)
 {
     static std::unordered_map<int, int> rules({ //maps neighbor count to rule
-        {0, -1},
-        {1, -1},
-        {2,  0},
-        {3,  1},
-        {4, -1},
-        {5, -1},
-        {6, -1},
-        {7, -1},
-        {8, -1},
+        { 0, -1 },
+        { 1, -1 },
+        { 2,  0 },
+        { 3,  1 },
+        { 4, -1 },
+        { 5, -1 },
+        { 6, -1 },
+        { 7, -1 },
+        { 8, -1 },
     });
 
     Matrix2D ruleMatrix;
@@ -109,13 +109,24 @@ Matrix2D getLiveNeighborCounts(const Matrix2D& adjacencyMatrix)
 
 
 
-Matrix2D sumMatrices(const Matrix2D& a, const Matrix2D& b)
+Matrix2D applyRuleMatrix(const Matrix2D& adjacencyMatrix, const Matrix2D& ruleMatrix)
 {
-    Matrix2D sum;
+    Matrix2D result;
     for (std::size_t i = 0; i < N; i++)
+    {
         for (std::size_t j = 0; j < N; j++)
-            sum[i][j] = a[i][j] + b[i][j];
-    return sum;
+        {
+            result[i][j] = adjacencyMatrix[i][j];
+
+            if (adjacencyMatrix[i][j] == 1 && ruleMatrix[i][j] == -1)
+                result[i][j] -= 1;
+            
+            if (adjacencyMatrix[i][j] == 0 && ruleMatrix[i][j] == 1)
+                result[i][j] += 1;
+        }
+    }
+
+    return result;
 }
 
 
